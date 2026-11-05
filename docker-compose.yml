@@ -1,0 +1,23 @@
+services:
+  coc-tracker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: coc-tracker-app
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+      - HOST=0.0.0.0
+      - COC_API_TOKEN=${COC_API_TOKEN:-}
+      - POLL_INTERVAL_MINUTES=${POLL_INTERVAL_MINUTES:-15}
+    volumes:
+      # Persistent storage for profiles, snapshot history, active builder timers and settings
+      - ./data:/app/data
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3000/api/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 5s

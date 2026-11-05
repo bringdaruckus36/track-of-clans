@@ -1,0 +1,22 @@
+{
+  "name": "track-of-clans",
+  "version": "1.0.0",
+  "description": "Clash of Clans Real-Time Upgrade & Player Tracker with Multi-Profile Support",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js"
+  },
+  "keywords": [
+    "clash-of-clans",
+    "tracker",
+    "docker",
+    "supercell",
+    "real-time"
+  ],
+  "author": "bringdaruckus36",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

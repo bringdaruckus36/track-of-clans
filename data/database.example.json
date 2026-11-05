@@ -1,0 +1,11 @@
+{
+  "settings": {
+    "cocApiToken": "",
+    "pollIntervalMinutes": 15,
+    "autoPollEnabled": true,
+    "useDemoIfEmpty": true
+  },
+  "activeProfileTag": null,
+  "profiles": {},
+  "events": []
+}

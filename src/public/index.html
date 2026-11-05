@@ -1,0 +1,1075 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Clash of Clans Tracker - Upgrades & Profiles Tracking</title>
+  <link rel="icon" href="https://assets.clashk.ing/bot/icons/clash_sword.png">
+  
+  <!-- Supercell Clash Gaming Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Montserrat:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="/css/styles.css?v=3.5">
+</head>
+<body>
+
+  <div class="app-container">
+    <!-- Header Bar -->
+    <header class="header-bar">
+      <div class="brand-section">
+        <div class="brand-icon">
+          <img src="https://assets.clashk.ing/bot/icons/clash_sword.png" alt="Clash Tracker" class="coc-icon-brand">
+        </div>
+        <div>
+          <div class="brand-title" data-i18n="brand.title">Clash Tracker</div>
+          <div class="brand-subtitle">
+            <span class="live-indicator"></span>
+            <span data-i18n="brand.subtitle">Real-Time Tracking • Supercell API</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="header-controls">
+        <!-- Multi Profile Selector -->
+        <div class="profile-selector-container">
+          <select id="profile-select" class="profile-select-dropdown" title="Select Player Profile" data-i18n-title="header.select_profile">
+            <option value="" data-i18n="header.loading_profiles">Loading profiles...</option>
+          </select>
+          <button id="btn-add-profile-modal" class="btn btn-secondary btn-icon" title="Add New Profile" data-i18n-title="header.add_profile_title">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+          </button>
+        </div>
+
+        <!-- Sync Button -->
+        <button id="btn-refresh-active" class="btn btn-primary btn-clash" title="Sync data now with the API" data-i18n-title="header.sync_title">
+          <img src="https://assets.clashk.ing/bot/icons/refresh.png" class="coc-icon-btn" id="refresh-icon" alt="Sync">
+          <span data-i18n="header.sync">Sync</span>
+        </button>
+
+        <!-- Settings Button -->
+        <button id="btn-open-settings" class="btn btn-secondary btn-icon" title="Settings, Profiles & History" data-i18n-title="header.settings_title">
+          <img src="https://assets.clashk.ing/bot/icons/gear.png" class="coc-icon-sm" alt="Settings">
+        </button>
+      </div>
+    </header>
+
+    <!-- Player Hero Banner -->
+    <section id="player-banner-section" class="player-banner">
+      <div class="banner-grid">
+        <!-- Town Hall Emblem & Render -->
+        <div class="th-box" id="banner-th-box">
+          <img id="banner-th-img" class="th-building-render" src="https://assets.clashk.ing/buildings/home-village/town_hall/level_16.webp" alt="Town Hall">
+          <div class="th-badge-tag">
+            <span class="th-label">TH</span>
+            <span class="th-level-num" id="banner-th-level">-</span>
+          </div>
+          <div class="th-stars" id="banner-th-stars" style="display: none;">★★★★★</div>
+        </div>
+
+        <!-- Details -->
+        <div class="player-details">
+          <div class="player-title-row">
+            <span class="player-name" id="banner-player-name" data-i18n="common.loading">Loading...</span>
+            <div class="exp-badge-box" title="Experience Level" data-i18n-title="banner.exp_title">
+              <img src="https://assets.clashk.ing/bot/icons/xp.png" class="exp-icon-img" alt="XP">
+              <span id="banner-player-exp">-</span>
+            </div>
+            <span class="player-tag-pill" id="banner-player-tag" title="Click to copy" data-i18n-title="banner.tag_copy_title">
+              <span>#TAG</span>
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v2m-6 12h8a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2h-8a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2z"/></svg>
+            </span>
+            <span id="banner-mode-badge" class="mode-badge-pill" data-i18n="banner.demo_mode">Demo Data</span>
+          </div>
+
+          <!-- Clan row -->
+          <div class="clan-meta-row" id="banner-clan-row">
+            <div class="clan-item">
+              <img id="banner-clan-badge" class="clan-badge-img" src="" alt="Clan Badge" style="display: none;">
+              <span class="clan-name-bold" id="banner-clan-name" data-i18n="banner.no_clan">No Clan</span>
+              <span id="banner-clan-level" style="color: var(--text-muted); font-size: 0.85rem;"></span>
+            </div>
+            <span class="clan-role-pill" id="banner-clan-role" data-i18n="roles.member">🛡️ Member</span>
+            <span style="font-size: 0.8rem; color: #94a3b8;" id="banner-last-sync">Synced: Never</span>
+          </div>
+        </div>
+
+        <!-- Right Side: League Tier, Trophies & Builder Stats -->
+        <div class="banner-stats-box">
+          <!-- Ranked League Tier Badge & Trophies -->
+          <div class="banner-league-badge-wrap" id="banner-tier-league-wrap" title="League Tier">
+            <img id="banner-tier-league-badge" class="league-crest tier-league-crest" src="https://api-assets.clashofclans.com/leaguetiers/125/CiSJYHyhMuloCpIIJ3n5-xCnRWrEd9vcq_zu6Ahkl3o.png" alt="League Tier" onerror="this.src='https://assets.clashk.ing/bot/icons/war_star.png'">
+            <div class="banner-league-caption tier-caption" id="banner-tier-league-name">Unranked</div>
+            <div class="stat-metric-label" style="font-size: 0.65rem; margin-top: 0.15rem;" data-i18n="banner.league_tier">League Tier</div>
+          </div>
+          <div class="stat-metric">
+            <div class="stat-metric-value" style="color: #fbbf24;">
+              <img src="https://assets.clashk.ing/bot/icons/trophy.png" class="coc-icon-md" alt="Trophy">
+              <span id="banner-trophies">-</span>
+            </div>
+            <div class="stat-metric-label" data-i18n="banner.current_trophies">Trophies</div>
+          </div>
+
+          <!-- Builder Base League Badge & Trophies -->
+          <div class="banner-league-badge-wrap" id="banner-bb-league-wrap" title="Builder Base League">
+            <img id="banner-bb-league-badge" class="league-crest bb-league-crest" src="https://assets.clashk.ing/bot/icons/versus_trophy.png" alt="Builder Base League" onerror="this.src='https://assets.clashk.ing/bot/icons/versus_trophy.png'">
+            <div class="banner-league-caption bb-caption" id="banner-bb-league-name">Unranked</div>
+            <div class="stat-metric-label" style="font-size: 0.65rem; margin-top: 0.15rem;" data-i18n="banner.builder_league">Builder League</div>
+          </div>
+          <div class="stat-metric">
+            <div class="stat-metric-value" style="color: #38bdf8;">
+              <img src="https://assets.clashk.ing/bot/icons/versus_trophy.png" class="coc-icon-md" alt="Builder Trophy">
+              <span id="banner-bb-trophies">-</span>
+            </div>
+            <div class="stat-metric-label" data-i18n="banner.builder_trophies">Builder Trophies</div>
+          </div>
+
+          <div class="stat-metric">
+            <div class="stat-metric-value" style="color: #cbd5e1;">
+              <img src="https://assets.clashk.ing/bot/icons/trophy.png" class="coc-icon-sm" style="filter: grayscale(1); opacity: 0.75;" alt="Record">
+              <span id="banner-best-trophies">-</span>
+            </div>
+            <div class="stat-metric-label" data-i18n="banner.best_trophies">All-Time Best</div>
+          </div>
+          <div class="stat-metric">
+            <div class="stat-metric-value" style="color: #f59e0b;">
+              <img src="https://assets.clashk.ing/bot/icons/war_star.png" class="coc-icon-md" alt="War Star">
+              <span id="banner-war-stars">-</span>
+            </div>
+            <div class="stat-metric-label" data-i18n="banner.war_stars">War Stars</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Navigation Tabs -->
+    <nav class="nav-tabs">
+      <button class="tab-btn active" data-tab="tab-overview">
+        <img src="https://assets.clashk.ing/bot/icons/clan_castle.png" class="coc-tab-icon" alt="Overview">
+        <span data-i18n="tabs.overview">Overview</span>
+      </button>
+      <button class="tab-btn" data-tab="tab-buildings">
+        <img src="https://assets.clashk.ing/bot/icons/clan_castle.png" class="coc-tab-icon" alt="Buildings">
+        <span><span data-i18n="tabs.buildings">Buildings & Defenses</span> (<span id="tab-bld-percent">0%</span>)</span>
+      </button>
+      <button class="tab-btn" data-tab="tab-army">
+        <img src="https://assets.clashk.ing/bot/icons/clash_sword.png" class="coc-tab-icon" alt="Army">
+        <span data-i18n="tabs.army">Army & Heroes</span>
+      </button>
+      <button class="tab-btn" data-tab="tab-achievements">
+        <img src="https://assets.clashk.ing/bot/icons/war_star.png" class="coc-tab-icon" alt="Achievements">
+        <span><span data-i18n="tabs.achievements">Achievements</span> (<span id="tab-ach-count">-</span>)</span>
+      </button>
+      <button class="tab-btn" data-tab="tab-import-village">
+        <img src="https://assets.clashk.ing/bot/icons/wrench.png" class="coc-tab-icon" alt="Import Village">
+        <span data-i18n="tabs.import_village">Import Village</span>
+      </button>
+    </nav>
+
+    <!-- TAB 1: OVERVIEW -->
+    <div id="tab-overview" class="tab-content active">
+      <!-- High Level Metrics Grid -->
+      <div class="metrics-grid">
+        <!-- Overall Max Progress -->
+        <div class="metric-card card-th">
+          <div class="metric-card-header">
+            <span class="metric-card-title" data-i18n="overview.overall_title">Total Account Progress</span>
+            <span class="metric-percent-badge" id="ov-overall-percent">0%</span>
+          </div>
+          <div class="metric-card-value" id="ov-overall-val">0%</div>
+          <div class="progress-bar-bg">
+            <div class="progress-bar-fill fill-gold" id="ov-overall-bar" style="width: 0%"></div>
+          </div>
+          <div class="metric-hint" data-i18n="overview.overall_hint">Calculated across Heroes, Buildings, Lab, Equipment, TH & Achievements</div>
+        </div>
+
+        <!-- Buildings & Defenses Progress -->
+        <div class="metric-card card-buildings">
+          <div class="metric-card-header">
+            <span class="metric-card-title">
+              <img src="https://assets.clashk.ing/bot/icons/clan_castle.png" class="coc-icon-xs" alt="Buildings">
+              <span data-i18n="overview.buildings_title">Buildings & Defenses</span>
+            </span>
+            <span class="metric-percent-badge" id="ov-buildings-percent" style="color: var(--gold);">0%</span>
+          </div>
+          <div class="metric-card-value" id="ov-buildings-val">0 / 0</div>
+          <div class="progress-bar-bg">
+            <div class="progress-bar-fill fill-gold" id="ov-buildings-bar" style="width: 0%"></div>
+          </div>
+          <div class="metric-hint" data-i18n="overview.buildings_hint">Village structures and defenses progress</div>
+        </div>
+
+        <!-- Heroes Progress -->
+        <div class="metric-card card-heroes">
+          <div class="metric-card-header">
+            <span class="metric-card-title">
+              <img src="https://assets.clashk.ing/heroes/barbarian_king/icon.webp" class="coc-icon-xs" alt="Heroes">
+              <span data-i18n="overview.heroes_title">Heroes Progress</span>
+            </span>
+            <span class="metric-percent-badge" id="ov-heroes-percent" style="color: var(--dark-elixir);">0%</span>
+          </div>
+          <div class="metric-card-value" id="ov-heroes-val">0 / 0</div>
+          <div class="progress-bar-bg">
+            <div class="progress-bar-fill fill-purple" id="ov-heroes-bar" style="width: 0%"></div>
+          </div>
+          <div class="metric-hint" data-i18n="overview.heroes_hint">Current levels compared to maximum</div>
+        </div>
+
+        <!-- Equipment Progress -->
+        <div class="metric-card card-equip">
+          <div class="metric-card-header">
+            <span class="metric-card-title">
+              <img src="https://assets.clashk.ing/bot/icons/equipment_epic.png" class="coc-icon-xs" alt="Equip">
+              <span data-i18n="overview.equip_title">Hero Equipment</span>
+            </span>
+            <span class="metric-percent-badge" id="ov-equip-percent" style="color: var(--builder-cyan);">0%</span>
+          </div>
+          <div class="metric-card-value" id="ov-equip-val">0 / 0</div>
+          <div class="progress-bar-bg">
+            <div class="progress-bar-fill fill-blue" id="ov-equip-bar" style="width: 0%"></div>
+          </div>
+          <div class="metric-hint" data-i18n="overview.equip_hint">Special hero equipment abilities</div>
+        </div>
+
+        <!-- Laboratory Progress -->
+        <div class="metric-card card-lab">
+          <div class="metric-card-header">
+            <span class="metric-card-title">
+              <img src="https://assets.clashk.ing/bot/icons/elixir.png" class="coc-icon-xs" alt="Laboratory">
+              <span data-i18n="overview.lab_title">Laboratory Research</span>
+            </span>
+            <span class="metric-percent-badge" id="ov-lab-percent" style="color: var(--elixir);">0%</span>
+          </div>
+          <div class="metric-card-value" id="ov-lab-val">0 / 0</div>
+          <div class="progress-bar-bg">
+            <div class="progress-bar-fill fill-pink" id="ov-lab-bar" style="width: 0%"></div>
+          </div>
+          <div class="metric-hint" data-i18n="overview.lab_hint">Troop and spell upgrades progress</div>
+        </div>
+      </div>
+
+      <!-- Quick Summary Cards -->
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.25rem;">
+        <!-- Left: Active Builder Quick View -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">
+              <img src="https://assets.clashk.ing/bot/icons/wrench.png" class="coc-icon-md" alt="Builders">
+              <span data-i18n="overview.active_builders_title">Active Builders Timers</span>
+            </div>
+            <button id="btn-quick-add-timer" class="btn btn-secondary btn-icon" title="Add timer" data-i18n-title="overview.quick_add_timer">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+            </button>
+          </div>
+          <div id="ov-active-timers-list">
+            <div style="color: var(--text-muted); font-size: 0.85rem; text-align: center; padding: 1.5rem;" data-i18n="overview.no_active_builders">No upgrades currently tracked. Click "+" to add a real-time countdown timer!</div>
+          </div>
+        </div>
+
+        <!-- Center: Battle Stats & Clan Donations -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">
+              <img src="https://assets.clashk.ing/bot/icons/shield.png" class="coc-icon-md" alt="Battles">
+              <span data-i18n="overview.battle_stats_title">Battle & Clan Stats</span>
+            </div>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 0.85rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem;">
+              <span style="color: var(--text-muted); display: flex; align-items: center; gap: 0.4rem;">
+                <img src="https://assets.clashk.ing/bot/icons/clash_sword.png" class="coc-icon-sm" alt="Attack">
+                <span data-i18n="overview.stat_attack_wins">Attack Wins:</span>
+              </span>
+              <strong id="ov-stat-attack-wins" style="font-family: 'Lilita One', sans-serif; font-size: 1.1rem; color: #4ade80;">-</strong>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem;">
+              <span style="color: var(--text-muted); display: flex; align-items: center; gap: 0.4rem;">
+                <img src="https://assets.clashk.ing/bot/icons/shield.png" class="coc-icon-sm" alt="Defense">
+                <span data-i18n="overview.stat_defense_wins">Defense Wins:</span>
+              </span>
+              <strong id="ov-stat-defense-wins" style="font-family: 'Lilita One', sans-serif; font-size: 1.1rem; color: #60a5fa;">-</strong>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem;">
+              <span style="color: var(--text-muted); display: flex; align-items: center; gap: 0.4rem;">
+                <img src="https://assets.clashk.ing/bot/icons/wrench.png" class="coc-icon-sm" alt="Builder">
+                <span data-i18n="overview.stat_builder_hall">Builder Hall:</span>
+              </span>
+              <strong id="ov-stat-builder-hall" style="font-family: 'Lilita One', sans-serif; font-size: 1rem; color: #fbbf24;">-</strong>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem;">
+              <span style="color: var(--text-muted); display: flex; align-items: center; gap: 0.4rem;">
+                <img src="https://assets.clashk.ing/bot/icons/versus_trophy.png" class="coc-icon-sm" alt="Builder Trophies">
+                <span data-i18n="overview.stat_bh_trophies">Builder Base Trophies:</span>
+              </span>
+              <strong id="ov-stat-bh-trophies" style="font-family: 'Lilita One', sans-serif; font-size: 1.1rem; color: #f59e0b;">-</strong>
+            </div>
+            <hr style="border-color: var(--border);">
+            <div>
+              <div style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 0.35rem;">
+                <span style="color: var(--text-muted); display: flex; align-items: center; gap: 0.4rem;">
+                  <img src="https://assets.clashk.ing/bot/icons/troop.png" class="coc-icon-sm" alt="Donations">
+                  <span data-i18n="overview.donations_title">Donations (Sent / Received):</span>
+                </span>
+                <span id="ov-donations-ratio" style="font-weight: bold; color: #fff;">0 / 0</span>
+              </div>
+              <div class="progress-bar-bg" style="height: 8px;">
+                <div class="progress-bar-fill fill-green" id="ov-donations-bar" style="width: 50%"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Closest Achievements -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">
+              <img src="https://assets.clashk.ing/bot/icons/war_star.png" class="coc-icon-md" alt="Achievements">
+              <span data-i18n="overview.closest_achievements_title">Achievements Closest to Completion</span>
+            </div>
+          </div>
+          <div id="ov-closest-achievements">
+            <div style="color: var(--text-muted); font-size: 0.85rem; text-align: center; padding: 1.5rem;" data-i18n="overview.loading_achievements">Loading achievements...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: BUILDINGS & DEFENSES TRACKER -->
+    <div id="tab-buildings" class="tab-content">
+      <div class="card">
+        <!-- Subtab Navigation between Home Village and Builder Base -->
+        <div class="village-subtabs-nav">
+          <button type="button" class="village-subtab-btn active" id="subtab-village-home" onclick="App.setBuildingsVillage('home')">
+            <img src="https://assets.clashk.ing/bot/icons/clan_castle.png" class="coc-icon-sm" alt="Home">
+            <span><span data-i18n="buildings.subtab_home">Home Village</span> (TH <span id="bld-th-num">1</span>)</span>
+          </button>
+          <button type="button" class="village-subtab-btn builder-btn" id="subtab-village-builder" onclick="App.setBuildingsVillage('builderBase')">
+            <img src="https://assets.clashk.ing/bot/icons/wrench.png" class="coc-icon-sm" alt="Builder">
+            <span><span data-i18n="buildings.subtab_builder">Builder Base</span> (BH <span id="bld-bh-num">1</span>)</span>
+          </button>
+        </div>
+
+        <div class="card-header" style="flex-wrap: wrap; gap: 0.75rem;">
+          <div class="card-title">
+            <img src="https://assets.clashk.ing/bot/icons/clan_castle.png" class="coc-icon-md" id="bld-header-icon" alt="Buildings">
+            <span id="bld-header-title" data-i18n="buildings.header_title">Buildings, Defenses & Resources Level Tracking</span>
+          </div>
+          <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center;">
+            <button id="btn-max-all-th" class="btn btn-secondary" title="Set all buildings to standard recommended levels for current Town Hall" data-i18n="buildings.max_at_current_th" data-i18n-title="buildings.max_at_current_th_title">⚡ Max to Current TH</button>
+            <span id="bld-saving-indicator" style="font-size: 0.8rem; color: #4ade80; display: none;" data-i18n="buildings.saved_indicator">✅ Saved</span>
+          </div>
+        </div>
+
+        <p id="bld-header-desc" style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;" data-i18n-html="buildings.desc_html">
+          Max levels and structures shown are <strong>automatically calibrated to your Town Hall level</strong> (locked buildings are hidden). For each building you can view total count and adjust levels with <strong>+</strong> and <strong>-</strong>!
+        </p>
+
+        <!-- Filter and Search Bar -->
+        <div class="achievements-filter-bar">
+          <button class="filter-btn bld-filter-btn active" data-bld-filter="all"><span data-i18n="buildings.filter_all">All</span> (<span id="bld-count-all">0</span>)</button>
+          <button class="filter-btn bld-filter-btn" data-bld-filter="defense"><span data-i18n="buildings.filter_defense">Defenses</span> (<span id="bld-count-defense">0</span>)</button>
+          <button class="filter-btn bld-filter-btn" data-bld-filter="trap"><span data-i18n="buildings.filter_trap">Traps</span> (<span id="bld-count-trap">0</span>)</button>
+          <button class="filter-btn bld-filter-btn" data-bld-filter="army"><span data-i18n="buildings.filter_army">Army</span> (<span id="bld-count-army">0</span>)</button>
+          <button class="filter-btn bld-filter-btn" data-bld-filter="resource"><span data-i18n="buildings.filter_resource">Resources</span> (<span id="bld-count-resource">0</span>)</button>
+          <input type="text" id="bld-search-input" class="search-input" placeholder="Search building (e.g. Cannon, Inferno, Monolith)..." data-i18n-placeholder="buildings.search_placeholder">
+        </div>
+
+        <!-- Buildings Grid -->
+        <div id="buildings-grid-container" class="buildings-grid">
+          <!-- Populated dynamically -->
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 3: ARMY & HEROES -->
+    <div id="tab-army" class="tab-content">
+      <!-- Heroes Section -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <img src="https://assets.clashk.ing/heroes/barbarian_king/icon.webp" class="coc-icon-md" alt="Heroes">
+            <span data-i18n="army.heroes_title">Heroes & Equipped Abilities</span>
+          </div>
+          <span id="badge-heroes-count" style="font-family: var(--font-supercell); font-size: 0.85rem; color: var(--dark-elixir);">-</span>
+        </div>
+        <div id="heroes-list-container" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1rem;">
+          <!-- Heroes populated dynamically with sprites -->
+        </div>
+      </div>
+
+      <!-- Village Helpers Section -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <img src="/images/helpers/builders-apprentice.png" class="coc-icon-md" alt="Helpers">
+            <span data-i18n="army.helpers_title">Village Helpers</span>
+          </div>
+          <span id="badge-helpers-count" style="font-family: var(--font-supercell); font-size: 0.85rem; color: var(--gold);">-</span>
+        </div>
+        <!-- Quick TH Max Filter & Status Toolbar for Helpers -->
+        <div class="army-filter-toolbar" style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1rem; align-items: center; justify-content: space-between;">
+          <div style="display: flex; gap: 0.4rem; flex-wrap: wrap; align-items: center;">
+            <button type="button" class="btn btn-sm btn-outline active" id="filter-helpers-all" onclick="App.setHelpersFilter('all')">
+              <span data-i18n="army.filter_all">All</span> (<span id="count-helpers-filter-all">0</span>)
+            </button>
+            <button type="button" class="btn btn-sm btn-outline" id="filter-helpers-thmax" onclick="App.setHelpersFilter('th_max')">
+              ★ <span id="label-helpers-filter-thmax">Max TH</span> (<span id="count-helpers-filter-thmax">0</span>)
+            </button>
+            <button type="button" class="btn btn-sm btn-outline" id="filter-helpers-upgrade" onclick="App.setHelpersFilter('needs_upgrade')">
+              ⏳ <span data-i18n="army.needs_upgrade">Needs Upgrade</span> (<span id="count-helpers-filter-upgrade">0</span>)
+            </button>
+            <button type="button" class="btn btn-sm btn-secondary" onclick="App.setAllHelpersToThMax()" title="Set all helpers to the maximum level for your Town Hall" style="margin-left: 0.35rem;">
+              ★ <span data-i18n="army.set_helpers_thmax">Set All to TH Max</span>
+            </button>
+          </div>
+          <div id="helpers-th-benchmark-note" style="font-size: 0.78rem; color: var(--text-muted); font-family: var(--font-body);">
+            <!-- Calibrated to Town Hall level caps -->
+          </div>
+        </div>
+        <div id="helpers-grid-container" class="items-grid">
+          <!-- Populated dynamically with sprites -->
+        </div>
+      </div>
+
+      <!-- Town Hall 18 Guardians Section -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <img src="/images/guardians/smasher.png" class="coc-icon-md" alt="Guardians">
+            <span data-i18n="army.guardians_title">Town Hall 18 Guardians</span>
+          </div>
+          <span id="badge-guardians-count" style="font-family: var(--font-supercell); font-size: 0.85rem; color: #a855f7;">-</span>
+        </div>
+        <!-- Quick TH Max Filter & Status Toolbar for Guardians -->
+        <div class="army-filter-toolbar" style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1rem; align-items: center; justify-content: space-between;">
+          <div style="display: flex; gap: 0.4rem; flex-wrap: wrap; align-items: center;">
+            <button type="button" class="btn btn-sm btn-outline active" id="filter-guardians-all" onclick="App.setGuardiansFilter('all')">
+              <span data-i18n="army.filter_all">All</span> (<span id="count-guardians-filter-all">0</span>)
+            </button>
+            <button type="button" class="btn btn-sm btn-outline" id="filter-guardians-thmax" onclick="App.setGuardiansFilter('th_max')">
+              ★ <span id="label-guardians-filter-thmax">Max TH</span> (<span id="count-guardians-filter-thmax">0</span>)
+            </button>
+            <button type="button" class="btn btn-sm btn-outline" id="filter-guardians-upgrade" onclick="App.setGuardiansFilter('needs_upgrade')">
+              ⏳ <span data-i18n="army.needs_upgrade">Needs Upgrade</span> (<span id="count-guardians-filter-upgrade">0</span>)
+            </button>
+            <button type="button" class="btn btn-sm btn-secondary" onclick="App.setAllGuardiansToThMax()" title="Set all guardians to the maximum level for your Town Hall" style="margin-left: 0.35rem;">
+              ★ <span data-i18n="army.set_guardians_thmax">Set All to TH Max</span>
+            </button>
+          </div>
+          <div id="guardians-th-benchmark-note" style="font-size: 0.78rem; color: var(--text-muted); font-family: var(--font-body);">
+            <!-- Calibrated to Town Hall 18 -->
+          </div>
+        </div>
+        <div id="guardians-grid-container" class="items-grid">
+          <!-- Populated dynamically with sprites -->
+        </div>
+      </div>
+
+      <!-- Hero Equipment Catalog -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <img src="https://assets.clashk.ing/bot/icons/equipment_epic.png" class="coc-icon-md" alt="Hero Equipment">
+            <span data-i18n="army.all_equip">All Hero Equipment</span>
+          </div>
+          <span id="badge-equipment-count" style="font-family: var(--font-supercell); font-size: 0.85rem; color: var(--builder-cyan);">-</span>
+        </div>
+        <!-- Quick TH Max Filter & Status Toolbar -->
+        <div class="army-filter-toolbar" style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1rem; align-items: center; justify-content: space-between;">
+          <div style="display: flex; gap: 0.4rem; flex-wrap: wrap; align-items: center;">
+            <button type="button" class="btn btn-sm btn-outline active" id="filter-equip-all" onclick="App.setEquipFilter('all')">
+              <span data-i18n="army.filter_all">All</span> (<span id="count-equip-filter-all">0</span>)
+            </button>
+            <button type="button" class="btn btn-sm btn-outline" id="filter-equip-thmax" onclick="App.setEquipFilter('th_max')">
+              ★ <span id="label-equip-filter-thmax">Max TH</span> (<span id="count-equip-filter-thmax">0</span>)
+            </button>
+            <button type="button" class="btn btn-sm btn-outline" id="filter-equip-upgrade" onclick="App.setEquipFilter('needs_upgrade')">
+              ⏳ <span data-i18n="army.needs_upgrade">Needs Upgrade</span> (<span id="count-equip-filter-upgrade">0</span>)
+            </button>
+          </div>
+          <div id="equip-th-benchmark-note" style="font-size: 0.78rem; color: var(--text-muted); font-family: var(--font-body);">
+            <!-- Calibrated to Town Hall Blacksmith caps -->
+          </div>
+        </div>
+        <div id="equipment-grid-container" class="items-grid">
+          <!-- Populated dynamically with sprites -->
+        </div>
+      </div>
+
+      <!-- Home Village Troops -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <img src="https://assets.clashk.ing/troops/barbarian/icon.webp" class="coc-icon-md" alt="Troops">
+            <span data-i18n="army.troops_home_title">Troops (Home Village)</span>
+          </div>
+          <span id="badge-troops-count" style="font-family: var(--font-supercell); font-size: 0.85rem; color: var(--gold);">-</span>
+        </div>
+        <!-- Quick TH Max Filter & Status Toolbar -->
+        <div class="army-filter-toolbar" style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1rem; align-items: center; justify-content: space-between;">
+          <div style="display: flex; gap: 0.4rem; flex-wrap: wrap; align-items: center;">
+            <button type="button" class="btn btn-sm btn-outline active" id="filter-troops-all" onclick="App.setTroopsFilter('all')">
+              <span data-i18n="army.filter_all">All</span> (<span id="count-troops-filter-all">0</span>)
+            </button>
+            <button type="button" class="btn btn-sm btn-outline" id="filter-troops-thmax" onclick="App.setTroopsFilter('th_max')">
+              ★ <span id="label-troops-filter-thmax">Max TH</span> (<span id="count-troops-filter-thmax">0</span>)
+            </button>
+            <button type="button" class="btn btn-sm btn-outline" id="filter-troops-upgrade" onclick="App.setTroopsFilter('needs_upgrade')">
+              ⏳ <span data-i18n="army.needs_upgrade">Needs Upgrade</span> (<span id="count-troops-filter-upgrade">0</span>)
+            </button>
+          </div>
+          <div id="troops-th-benchmark-note" style="font-size: 0.78rem; color: var(--text-muted); font-family: var(--font-body);">
+            <!-- Calibrated to Town Hall Laboratory caps -->
+          </div>
+        </div>
+        <div id="troops-home-grid" class="items-grid">
+          <!-- Populated dynamically with sprites -->
+        </div>
+      </div>
+
+      <!-- Super Troops -->
+      <div class="card card-super-troops">
+        <div class="card-header">
+          <div class="card-title">
+            <img src="https://assets.clashk.ing/troops/super_barbarian/icon.webp" class="coc-icon-md" alt="Super Troops">
+            <span data-i18n="army.super_troops_title">Super Troops</span>
+          </div>
+          <span id="badge-super-troops-count" style="font-family: var(--font-supercell); font-size: 0.85rem; color: #f97316;">-</span>
+        </div>
+        <div id="super-troops-grid" class="items-grid">
+          <!-- Populated dynamically with sprites -->
+        </div>
+      </div>
+
+      <!-- Pets -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <img src="https://assets.clashk.ing/buildings/home-village/pet_house/level_1.webp" class="coc-icon-md" alt="Pets">
+            <span data-i18n="army.pets_title">Hero Pets</span>
+          </div>
+          <span id="badge-pets-count" style="font-family: var(--font-supercell); font-size: 0.85rem; color: var(--dark-elixir);">-</span>
+        </div>
+        <!-- Quick TH Max Filter & Status Toolbar for Pets -->
+        <div class="army-filter-toolbar" style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1rem; align-items: center; justify-content: space-between;">
+          <div style="display: flex; gap: 0.4rem; flex-wrap: wrap; align-items: center;">
+            <button type="button" class="btn btn-sm btn-outline active" id="filter-pets-all" onclick="App.setPetsFilter('all')">
+              <span data-i18n="army.filter_all">All</span> (<span id="count-pets-filter-all">0</span>)
+            </button>
+            <button type="button" class="btn btn-sm btn-outline" id="filter-pets-thmax" onclick="App.setPetsFilter('th_max')">
+              ★ <span id="label-pets-filter-thmax">Max TH</span> (<span id="count-pets-filter-thmax">0</span>)
+            </button>
+            <button type="button" class="btn btn-sm btn-outline" id="filter-pets-upgrade" onclick="App.setPetsFilter('needs_upgrade')">
+              ⏳ <span data-i18n="army.needs_upgrade">Needs Upgrade</span> (<span id="count-pets-filter-upgrade">0</span>)
+            </button>
+          </div>
+          <div id="pets-th-benchmark-note" style="font-size: 0.78rem; color: var(--text-muted); font-family: var(--font-body);">
+            <!-- Calibrated to Town Hall Pet House caps -->
+          </div>
+        </div>
+        <div id="pets-grid" class="items-grid">
+          <!-- Populated dynamically with sprites -->
+        </div>
+      </div>
+
+      <!-- Siege Machines -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <img src="https://assets.clashk.ing/buildings/home-village/workshop/level_1.webp" class="coc-icon-md" alt="Siege Machines">
+            <span data-i18n="army.siege_title">Siege Machines (Workshop)</span>
+          </div>
+          <span id="badge-sieges-count" style="font-family: var(--font-supercell); font-size: 0.85rem; color: var(--gold);">-</span>
+        </div>
+        <div id="siege-machines-grid" class="items-grid">
+          <!-- Populated dynamically with sprites -->
+        </div>
+      </div>
+
+      <!-- Spells -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <img src="https://assets.clashk.ing/spells/rage_spell.webp" class="coc-icon-md" alt="Spells">
+            <span data-i18n="army.spells_title">Spells</span>
+          </div>
+          <span id="badge-spells-count" style="font-family: var(--font-supercell); font-size: 0.85rem; color: var(--elixir);">-</span>
+        </div>
+        <!-- Quick TH Max Filter & Status Toolbar for Spells -->
+        <div class="army-filter-toolbar" style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1rem; align-items: center; justify-content: space-between;">
+          <div style="display: flex; gap: 0.4rem; flex-wrap: wrap; align-items: center;">
+            <button type="button" class="btn btn-sm btn-outline active" id="filter-spells-all" onclick="App.setSpellsFilter('all')">
+              <span data-i18n="army.filter_all">All</span> (<span id="count-spells-filter-all">0</span>)
+            </button>
+            <button type="button" class="btn btn-sm btn-outline" id="filter-spells-thmax" onclick="App.setSpellsFilter('th_max')">
+              ★ <span id="label-spells-filter-thmax">Max TH</span> (<span id="count-spells-filter-thmax">0</span>)
+            </button>
+            <button type="button" class="btn btn-sm btn-outline" id="filter-spells-upgrade" onclick="App.setSpellsFilter('needs_upgrade')">
+              ⏳ <span data-i18n="army.needs_upgrade">Needs Upgrade</span> (<span id="count-spells-filter-upgrade">0</span>)
+            </button>
+          </div>
+          <div id="spells-th-benchmark-note" style="font-size: 0.78rem; color: var(--text-muted); font-family: var(--font-body);">
+            <!-- Calibrated to Town Hall Laboratory caps -->
+          </div>
+        </div>
+        <div id="spells-grid" class="items-grid">
+          <!-- Populated dynamically with sprites -->
+        </div>
+      </div>
+
+      <!-- Builder Base Troops -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <img src="https://assets.clashk.ing/troops/raged_barbarian/icon.webp" class="coc-icon-md" alt="Builder Base Troops">
+            <span data-i18n="army.troops_builder_title">Troops (Builder Base)</span>
+          </div>
+          <span id="badge-troops-builder-count" style="font-family: var(--font-supercell); font-size: 0.85rem; color: var(--builder-cyan);">-</span>
+        </div>
+        <div id="troops-builder-grid" class="items-grid">
+          <!-- Populated dynamically with sprites -->
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 4: ACHIEVEMENTS -->
+    <div id="tab-achievements" class="tab-content">
+      <div class="card">
+        <!-- Subtab Navigation between All, Home Village, Builder Base, and Clan Capital -->
+        <div class="village-subtabs-nav" id="achievements-village-subtabs">
+          <button type="button" class="village-subtab-btn active" id="subtab-ach-all" onclick="App.setAchievementsVillage('all')">
+            <img src="https://assets.clashk.ing/bot/icons/war_star.png" class="coc-icon-sm" alt="All">
+            <span><span data-i18n="achievements.subtab_all">All</span> (<span id="ach-count-tab-all">0</span>)</span>
+          </button>
+          <button type="button" class="village-subtab-btn" id="subtab-ach-home" onclick="App.setAchievementsVillage('home')">
+            <img src="https://assets.clashk.ing/bot/icons/clan_castle.png" class="coc-icon-sm" alt="Home">
+            <span><span data-i18n="achievements.subtab_home">Home Village</span> (<span id="ach-count-tab-home">0</span>)</span>
+          </button>
+          <button type="button" class="village-subtab-btn builder-btn" id="subtab-ach-builder" onclick="App.setAchievementsVillage('builderBase')">
+            <img src="https://assets.clashk.ing/bot/icons/wrench.png" class="coc-icon-sm" alt="Builder">
+            <span><span data-i18n="achievements.subtab_builder">Builder Base</span> (<span id="ach-count-tab-builder">0</span>)</span>
+          </button>
+          <button type="button" class="village-subtab-btn capital-btn" id="subtab-ach-capital" onclick="App.setAchievementsVillage('clanCapital')">
+            <img src="https://assets.clashk.ing/bot/icons/capital_gold.png" class="coc-icon-sm" alt="Clan Capital">
+            <span><span data-i18n="achievements.subtab_capital">Clan Capital</span> (<span id="ach-count-tab-capital">0</span>)</span>
+          </button>
+        </div>
+
+        <div class="card-header">
+          <div class="card-title">
+            <img src="https://assets.clashk.ing/bot/icons/war_star.png" class="coc-icon-md" alt="Achievements">
+            <span><span data-i18n="tabs.achievements">Achievements</span> Supercell (<span id="ach-summary-stars">0</span> <span data-i18n="achievements.stars_label">stars unlocked</span>)</span>
+          </div>
+        </div>
+
+        <!-- Filter bar -->
+        <div class="achievements-filter-bar">
+          <button class="filter-btn active" data-filter="all" data-i18n="achievements.filter_all">All</button>
+          <button class="filter-btn" data-filter="in_progress" data-i18n="achievements.filter_in_progress">In Progress</button>
+          <button class="filter-btn" data-filter="completed" data-i18n="achievements.filter_completed">Completed (3★)</button>
+          <input type="text" id="ach-search-input" class="search-input" placeholder="Search achievement (e.g. Gold, War, Walls, Capital)..." data-i18n-placeholder="achievements.search_placeholder">
+        </div>
+
+        <div id="achievements-list-container">
+          <!-- Populated dynamically -->
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 5: IMPORT VILLAGE -->
+    <div id="tab-import-village" class="tab-content">
+      <div class="card import-village-card">
+        <div class="card-header" style="flex-wrap: wrap; gap: 0.75rem;">
+          <div class="card-title">
+            <img src="https://assets.clashk.ing/bot/icons/wrench.png" class="coc-icon-md" alt="Import Village">
+            <span data-i18n="import_village.title">Import Village Buildings & Levels</span>
+          </div>
+        </div>
+
+        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.25rem; line-height: 1.6;" data-i18n-html="import_village.desc_html">
+          Import and calibrate your village building levels directly into Clash Tracker via JSON. Select whether to import for the <strong>Home Village</strong>, <strong>Builder Base</strong>, or both! You can also export your current setup as a backup.
+        </p>
+
+        <!-- Target Village Selection & Mode -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; margin-bottom: 1.25rem;">
+          <!-- Target Village -->
+          <div class="form-group" style="margin-bottom: 0; background: var(--bg-surface); padding: 1rem; border-radius: 0.5rem; border: 1px solid var(--border);">
+            <label class="form-label" style="margin-bottom: 0.5rem;" data-i18n="import_village.target_label">Target Village:</label>
+            <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+              <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; font-size: 0.85rem; color: #fff;">
+                <input type="radio" name="village-import-target" value="home" checked>
+                <span data-i18n="import_village.target_home">🏰 Home Village</span>
+              </label>
+              <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; font-size: 0.85rem; color: #fff;">
+                <input type="radio" name="village-import-target" value="builderBase">
+                <span data-i18n="import_village.target_builder">🔨 Builder Base</span>
+              </label>
+              <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; font-size: 0.85rem; color: #fff;">
+                <input type="radio" name="village-import-target" value="both">
+                <span data-i18n="import_village.target_both">🌐 Both Villages</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Mode -->
+          <div class="form-group" style="margin-bottom: 0; background: var(--bg-surface); padding: 1rem; border-radius: 0.5rem; border: 1px solid var(--border);">
+            <label class="form-label" style="margin-bottom: 0.5rem;" data-i18n="import_village.mode_label">Import Mode:</label>
+            <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+              <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; font-size: 0.85rem; color: #fff;">
+                <input type="radio" name="village-import-mode" value="merge" checked>
+                <span data-i18n="import_village.mode_merge">Merge / Update matching buildings</span>
+              </label>
+              <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; font-size: 0.85rem; color: #f87171;">
+                <input type="radio" name="village-import-mode" value="replace">
+                <span data-i18n="import_village.mode_replace">Replace all buildings in target village</span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- File Upload & Quick Templates Toolbar -->
+        <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; margin-bottom: 0.75rem;">
+          <label for="village-import-file" class="btn btn-secondary" style="cursor: pointer; font-size: 0.8rem; display: inline-flex; align-items: center; gap: 0.4rem;">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+            <span data-i18n="import_village.file_label">Upload JSON File</span>
+          </label>
+          <input type="file" id="village-import-file" accept=".json,application/json" style="display: none;">
+
+          <button type="button" id="btn-village-template-th" class="btn btn-secondary" style="font-size: 0.8rem;">
+            <span id="btn-village-template-th-label" data-i18n="import_village.load_th_template">📋 Load TH Home Template</span>
+          </button>
+          <button type="button" id="btn-village-template-bh" class="btn btn-secondary" style="font-size: 0.8rem;">
+            <span id="btn-village-template-bh-label" data-i18n="import_village.load_bh_template">📋 Load BH Builder Template</span>
+          </button>
+          <button type="button" id="btn-village-template-sample" class="btn btn-secondary" style="font-size: 0.8rem;" data-i18n="import_village.load_sample">📋 Load Sample JSON</button>
+          <button type="button" id="btn-clear-village-json" class="btn btn-secondary" style="font-size: 0.8rem;" data-i18n="import_village.clear_btn">🧹 Clear Text</button>
+
+          <span id="village-file-name" style="font-size: 0.8rem; color: var(--gold); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 200px;"></span>
+        </div>
+
+        <!-- Textarea with Live Status -->
+        <div class="form-group">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem;">
+            <label class="form-label" style="margin-bottom: 0;" data-i18n="import_village.paste_label">Or paste Village JSON below:</label>
+            <span id="import-village-counter" style="font-size: 0.8rem; color: var(--text-muted);">0 buildings recognized</span>
+          </div>
+          <textarea id="import-village-textarea" class="import-village-textarea" rows="12" placeholder='{
+  "cannon": 21,
+  "archer_tower": 21,
+  "wizard_tower": 15,
+  "inferno_tower": 10,
+  "eagle_artillery": 6,
+  "monolith": 3,
+  "spell_tower": 3,
+  "clan_castle": 12,
+  "walls": 17
+}'></textarea>
+        </div>
+
+        <!-- Action Buttons -->
+        <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: center; justify-content: space-between; margin-top: 1rem;">
+          <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+            <button type="button" id="btn-import-village-submit" class="btn btn-primary btn-clash">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+              <span data-i18n="import_village.import_btn">📥 Import Village Buildings</span>
+            </button>
+            <button type="button" id="btn-export-village-json" class="btn btn-secondary">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4 4l4 4m0 0l4-4m-4 4V4"/></svg>
+              <span data-i18n="import_village.export_btn">📤 Export Current Village JSON</span>
+            </button>
+          </div>
+          <span id="import-village-status" style="font-size: 0.85rem; font-weight: 600;"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: SETTINGS, PROFILES & HISTORY PANEL -->
+  <div id="modal-settings-window" class="modal-overlay">
+    <div class="modal-content modal-settings-dialog">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <img src="https://assets.clashk.ing/bot/icons/gear.png" class="coc-icon-md" alt="Settings">
+          <h3 class="modal-title" data-i18n="settings_modal.title">Settings & History Panel</h3>
+        </div>
+        <button class="close-btn" data-modal="modal-settings-window" title="Close window" data-i18n-title="common.close_window">&times;</button>
+      </div>
+
+      <!-- Modal Tabs -->
+      <div class="settings-dialog-nav">
+        <button type="button" class="settings-dialog-tab-btn active" data-subtab="subtab-profiles-api">
+          <img src="https://assets.clashk.ing/bot/icons/gear.png" class="coc-icon-xs" alt="Profiles & API">
+          <span data-i18n="settings_modal.tab_profiles_api">Profiles & API</span>
+        </button>
+        <button type="button" class="settings-dialog-tab-btn" data-subtab="subtab-events-history">
+          <img src="https://assets.clashk.ing/bot/icons/time.png" class="coc-icon-xs" alt="History">
+          <span><span data-i18n="settings_modal.tab_history">History</span> (<span id="tab-events-count">0</span>)</span>
+        </button>
+      </div>
+
+      <!-- Modal Scrollable Body -->
+      <div class="settings-dialog-body">
+        <!-- SUBTAB 1: PROFILES & API -->
+        <div id="subtab-profiles-api" class="settings-dialog-pane active">
+          <!-- Profiles List & Management -->
+          <div class="card" style="margin-bottom: 1.25rem;">
+            <div class="card-header">
+              <div class="card-title">
+                <img src="https://assets.clashk.ing/bot/icons/people.png" class="coc-icon-md" alt="Profiles">
+                <span data-i18n="settings_modal.all_profiles">All Tracked Profiles</span>
+              </div>
+              <button id="btn-add-profile-tab" class="btn btn-primary btn-clash">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+                <span data-i18n="settings_modal.add_profile_btn">Add Profile</span>
+              </button>
+            </div>
+            <div id="profiles-table-container">
+              <!-- Table rendered dynamically -->
+            </div>
+          </div>
+
+          <!-- API Configuration -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">
+                <img src="https://assets.clashk.ing/bot/icons/gear.png" class="coc-icon-md" alt="API">
+                <span data-i18n="settings_modal.api_config_title">Clash of Clans API Configuration (Supercell)</span>
+              </div>
+            </div>
+
+            <form id="api-settings-form">
+              <div class="form-group">
+                <label class="form-label" data-i18n="settings_modal.api_token_label">Official API Token (Supercell Developer Portal)</label>
+                <input type="password" id="input-api-token" class="form-control" placeholder="Paste your JWT Token generated on developer.clashofclans.com" data-i18n-placeholder="settings_modal.api_token_placeholder">
+                <div class="form-help" data-i18n-html="settings_modal.api_token_help">
+          The token must be created on <a href="https://developer.clashofclans.com" target="_blank" style="color: var(--gold);">developer.clashofclans.com</a> and bound to this server/container public IP.
+        </div>
+              </div>
+
+              <div style="background: var(--bg-surface); padding: 1rem; border-radius: 0.5rem; border: 1px solid var(--border); margin-bottom: 1rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
+                  <div>
+                    <strong style="color: #fff; font-size: 0.85rem;" data-i18n="settings_modal.detected_ip_label">Detected Public IP of Server/Container:</strong>
+                    <div id="detected-public-ip" style="font-family: monospace; font-size: 1.1rem; color: #38bdf8; margin-top: 0.2rem;" data-i18n="common.loading">Loading...</div>
+                  </div>
+                  <button type="button" id="btn-copy-ip" class="btn btn-secondary">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v2m-6 12h8a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2h-8a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2z"/></svg>
+                    <span data-i18n="settings_modal.copy_ip_btn">Copy IP for Supercell</span>
+                  </button>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" data-i18n="settings_modal.poll_interval_label">Background Auto-Sync Interval</label>
+                <select id="select-poll-interval" class="form-control" style="max-width: 260px;">
+                  <option value="5" data-i18n="settings_modal.interval_5">Every 5 minutes</option>
+                  <option value="15" selected data-i18n="settings_modal.interval_15">Every 15 minutes (Recommended)</option>
+                  <option value="30" data-i18n="settings_modal.interval_30">Every 30 minutes</option>
+                  <option value="60" data-i18n="settings_modal.interval_60">Every 60 minutes</option>
+                </select>
+              </div>
+
+              <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; margin-top: 1rem;">
+                <button type="submit" class="btn btn-primary btn-clash" data-i18n="settings_modal.save_api_btn">Save API Settings</button>
+                <button type="button" id="btn-load-demo" class="btn btn-secondary" data-i18n="settings_modal.load_demo_btn">Reload Default Demo Profiles</button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <!-- SUBTAB 2: HISTORY -->
+        <div id="subtab-events-history" class="settings-dialog-pane">
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">
+                <img src="https://assets.clashk.ing/bot/icons/time.png" class="coc-icon-md" alt="History">
+                <span data-i18n="settings_modal.history_title">Upgrades & Notifications History</span>
+              </div>
+              <button id="btn-refresh-events" class="btn btn-secondary btn-icon" title="Refresh history" data-i18n-title="settings_modal.refresh_history_title">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+              </button>
+            </div>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;" data-i18n="settings_modal.history_desc">Every time profiles are synced, the system compares data against the snapshot and logs upgrades for heroes, troops, spells, defenses, trophies and stars!</p>
+            <div id="events-feed-container">
+              <!-- Populated dynamically -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: ADD PROFILE -->
+  <div id="modal-add-profile" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title" data-i18n="modals.add_profile_title">Add Player Profile</h3>
+        <button class="close-btn" data-modal="modal-add-profile" title="Close window" data-i18n-title="common.close_window">&times;</button>
+      </div>
+      <div id="add-profile-welcome-notice" style="display: none; background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.25); border-radius: 8px; padding: 0.75rem 1rem; margin-bottom: 1.25rem;">
+        <div style="font-weight: 700; color: #93c5fd; font-size: 0.95rem; margin-bottom: 0.25rem;">👋 Welcome to Track of Clans!</div>
+        <div style="font-size: 0.8rem; color: var(--text-muted); line-height: 1.4;">Add your player tag to start monitoring village upgrades, timers, army, and defense levels.</div>
+      </div>
+      <div id="add-profile-token-notice" style="display: none; background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 8px; padding: 0.75rem 1rem; margin-bottom: 1.25rem; font-size: 0.82rem; color: #fde68a;">
+        <span>🔑 <strong>API Token:</strong> To fetch data from official Supercell servers, make sure your token is configured in <a href="javascript:void(0)" id="link-open-settings-from-add" style="color: #60a5fa; text-decoration: underline; font-weight: 600;">API Settings (⚙️)</a>.</span>
+      </div>
+      <form id="form-add-profile">
+        <div class="form-group">
+          <label class="form-label" data-i18n="modals.player_tag_label">Player Tag (Clash of Clans)</label>
+          <input type="text" id="add-profile-tag" class="form-control" placeholder="#2PP09V..." required style="text-transform: uppercase;">
+          <div class="form-help" data-i18n="modals.player_tag_help">Find your tag inside Clash of Clans on your player profile under your nickname.</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label" data-i18n="modals.alias_label">Nickname / Alias (Optional)</label>
+          <input type="text" id="add-profile-nick" class="form-control" placeholder="e.g. Main Account, Mini War, Donations" data-i18n-placeholder="modals.alias_placeholder">
+        </div>
+        <div style="display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 1.5rem;">
+          <button type="button" class="btn btn-secondary close-btn" data-modal="modal-add-profile" data-i18n="common.cancel">Cancel</button>
+          <button type="submit" class="btn btn-primary btn-clash" id="btn-submit-add-profile" data-i18n="modals.add_and_track_btn">Add and Track</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: ADD UPGRADE TIMER -->
+  <div id="modal-add-timer" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title" data-i18n="modals.add_timer_title">Add In-Progress Upgrade</h3>
+        <button class="close-btn" data-modal="modal-add-timer" title="Close window" data-i18n-title="common.close_window">&times;</button>
+      </div>
+      <form id="form-add-timer">
+        <div class="form-group">
+          <label class="form-label" data-i18n="modals.upgrade_type_label">Upgrade Type</label>
+          <select id="timer-type" class="form-control">
+            <option value="builder" data-i18n="modals.type_builder">🔨 Builder's Hut (Buildings / Heroes / Defenses)</option>
+            <option value="lab" data-i18n="modals.type_lab">⚗️ Laboratory (Troops / Spells)</option>
+            <option value="pet" data-i18n="modals.type_pet">🐾 Pet House</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label" data-i18n="modals.item_name_label">Upgrade Item Name</label>
+          <input type="text" id="timer-name" class="form-control" placeholder="e.g. Archer Queen Lvl. 100, Inferno Tower..." data-i18n-placeholder="modals.item_name_placeholder" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" data-i18n="modals.builder_slot_label">Builder Slot (1 - 6)</label>
+          <select id="timer-builder-idx" class="form-control">
+            <option value="1">Builder 1</option>
+            <option value="2">Builder 2</option>
+            <option value="3">Builder 3</option>
+            <option value="4">Builder 4</option>
+            <option value="5">Builder 5</option>
+            <option value="6">Builder 6 (B.O.B)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label" data-i18n="modals.time_remaining_label">Time Remaining</label>
+          <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.5rem;">
+            <div>
+              <input type="number" id="timer-days" class="form-control" min="0" max="30" placeholder="Days" data-i18n-placeholder="modals.days" value="1">
+              <span style="font-size: 0.7rem; color: var(--text-muted);" data-i18n="modals.days">Days</span>
+            </div>
+            <div>
+              <input type="number" id="timer-hours" class="form-control" min="0" max="23" placeholder="Hours" data-i18n-placeholder="modals.hours" value="12">
+              <span style="font-size: 0.7rem; color: var(--text-muted);" data-i18n="modals.hours">Hours</span>
+            </div>
+            <div>
+              <input type="number" id="timer-mins" class="form-control" min="0" max="59" placeholder="Minutes" data-i18n-placeholder="modals.mins" value="0">
+              <span style="font-size: 0.7rem; color: var(--text-muted);" data-i18n="modals.mins">Minutes</span>
+            </div>
+          </div>
+        </div>
+        <div style="display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 1.5rem;">
+          <button type="button" class="btn btn-secondary close-btn" data-modal="modal-add-timer" data-i18n="common.cancel">Cancel</button>
+          <button type="submit" class="btn btn-primary btn-clash" data-i18n="modals.start_timer_btn">Start Timer</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: IMPORT UPGRADES JSON -->
+  <div id="modal-import-upgrades" class="modal-overlay">
+    <div class="modal-content" style="max-width: 620px;">
+      <div class="modal-header">
+        <h3 class="modal-title" style="display: flex; align-items: center; gap: 0.5rem;">
+          <img src="https://assets.clashk.ing/bot/icons/wrench.png" class="coc-icon-sm" alt="Timer">
+          <span data-i18n="modals.import_title">Import Upgrades from JSON</span>
+        </h3>
+        <button class="close-btn" data-modal="modal-import-upgrades" title="Close window" data-i18n-title="common.close_window">&times;</button>
+      </div>
+      <form id="form-import-upgrades">
+        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.85rem;" data-i18n="modals.import_desc">Upload or paste a JSON file/text with active upgrades (builders, lab, pets). Timers will calculate automatically down to the second!</p>
+
+        <!-- File Upload & Example Buttons -->
+        <div class="form-group">
+          <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
+            <label for="import-json-file" class="btn btn-secondary" style="cursor: pointer; font-size: 0.8rem; display: inline-flex; align-items: center; gap: 0.4rem;">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+              <span data-i18n="modals.upload_json_file">Upload .JSON File</span>
+            </label>
+            <input type="file" id="import-json-file" accept=".json,application/json" style="display: none;">
+            <button type="button" id="btn-load-json-template" class="btn btn-secondary" style="font-size: 0.8rem;" data-i18n="modals.insert_json_example">Insert JSON Example</button>
+            <span id="import-file-name" style="font-size: 0.8rem; color: var(--gold); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 220px;"></span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem;">
+            <label class="form-label" style="margin-bottom: 0;" data-i18n="modals.json_text_label">JSON Text:</label>
+            <span id="import-json-counter" style="font-size: 0.75rem; color: var(--text-muted);">0 items detected</span>
+          </div>
+          <textarea id="import-json-textarea" class="form-control" rows="8" placeholder='[
+  {
+    "name": "Monolith Lvl. 5",
+    "builderIndex": 1,
+    "days": 4,
+    "hours": 12,
+    "type": "builder"
+  },
+  {
+    "name": "X-Bow Lvl. 13",
+    "builderIndex": 2,
+    "days": 2,
+    "hours": 6,
+    "type": "builder"
+  }
+]' style="font-family: monospace; font-size: 0.85rem; resize: vertical; line-height: 1.4;"></textarea>
+          <div class="form-help" data-i18n-html="modals.json_help">
+          Supports both relative duration (<code>days</code>, <code>hours</code>, <code>mins</code> / <code>remainingSeconds</code>) and exact completion date (<code>endTime</code> in ISO or milliseconds).
+        </div>
+        </div>
+
+        <!-- Import Mode -->
+        <div class="form-group">
+          <label class="form-label" data-i18n="modals.import_mode_label">Import Mode</label>
+          <div style="display: flex; gap: 1.5rem; flex-wrap: wrap;">
+            <label style="display: flex; align-items: center; gap: 0.4rem; cursor: pointer; font-size: 0.85rem; color: #fff;">
+              <input type="radio" name="import-mode" value="merge" checked>
+              <span data-i18n="modals.mode_merge">Add to existing timers</span>
+            </label>
+            <label style="display: flex; align-items: center; gap: 0.4rem; cursor: pointer; font-size: 0.85rem; color: #fff;">
+              <input type="radio" name="import-mode" value="replace">
+              <span style="color: #f87171;" data-i18n="modals.mode_replace">Replace all current timers</span>
+            </label>
+          </div>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 1.5rem;">
+          <button type="button" class="btn btn-secondary close-btn" data-modal="modal-import-upgrades" data-i18n="common.cancel">Cancel</button>
+          <button type="submit" class="btn btn-primary btn-clash" id="btn-submit-import-upgrades" data-i18n="modals.import_btn">Import Upgrades</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container"></div>
+
+  <!-- Scripts -->
+  <script src="/js/i18n.js?v=3.5"></script>
+  <script src="/js/assets.js?v=3.5"></script>
+  <script src="/js/benchmarks.js?v=3.5"></script>
+  <script src="/js/app.js?v=3.8"></script>
+</body>
+</html>
